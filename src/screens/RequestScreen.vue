@@ -120,6 +120,7 @@ onMounted(async () => {
             <section class="request-head">
                 <div class="request-head-top">
                     <StatusPill :status="task.status" />
+                    <span v-if="task.urgent" class="pill is-urgent">Urgent</span>
                     <span class="request-source">{{ task.source.name }}</span>
                 </div>
                 <h2>{{ task.customer_name }}</h2>
@@ -136,6 +137,8 @@ onMounted(async () => {
             </template>
 
             <div class="details">
+                <div v-if="task.parent_destination" class="detail"><span>Destination</span><strong>{{ task.parent_destination.name }}</strong></div>
+                <div v-if="task.specific_hotel" class="detail"><span>Hotel</span><strong>{{ task.specific_hotel }}</strong></div>
                 <div class="detail"><span>Agent</span><strong>{{ task.assigned_to ? (task.assigned_to.id === state.profile.id ? `You (${task.assigned_to.name})` : task.assigned_to.name) : 'Not assigned' }}</strong></div>
                 <div v-if="task.assigned_at" class="detail"><span>Assigned</span><strong>{{ task.assigned_at }}</strong></div>
                 <div class="detail"><span>Created</span><strong>{{ task.created_at }}<template v-if="task.created_by"> · {{ task.created_by.name }}</template></strong></div>
