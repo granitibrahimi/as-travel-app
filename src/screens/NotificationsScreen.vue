@@ -17,8 +17,8 @@ const page = ref(0);
 const lastPage = ref(1);
 const busy = ref(false);
 
-/** A notification's link inside this app (the SPA's /requests/{id} is the same path here). */
-const appLink = (url) => (url && /^\/requests\/\d+$/.test(url) ? url : null);
+/** A notification's link inside this app: a request (same path as the SPA) or a reminder. */
+const appLink = (url) => (url && /^\/(requests|reminders)\/\d+$/.test(url) ? url : null);
 
 async function load() {
     busy.value = true;
