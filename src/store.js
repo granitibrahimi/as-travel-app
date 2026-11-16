@@ -27,7 +27,7 @@ export const can = (permission) => {
     return permissions.includes('*') || permissions.includes(permission);
 };
 
-export const canListRequests = () => can('simpleTasks.list') || can('simpleTasks.listAll');
+export const canListRequests = () => can('simpleTasks.list') || can('simpleTasks.listAll') || can('simpleTasks.receive');
 export const seesAllRequests = () => can('simpleTasks.listAll');
 export const canSeeNotifications = () => can('userNotifications.list');
 
