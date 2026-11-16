@@ -1,6 +1,6 @@
 # AS Travel app
 
-The AS Travel team's phone app (English, installable PWA) for customer
+The AS Travel team's phone app (English, installable PWA, on `agents-app.astravel.com`) for customer
 requests: sign in with the AS Travel platform account, turn on push
 notifications, and get notified when a request is assigned to you (and, with
 `simpleTasks.responsible`, when a request is closed as Offer sent or Spam).
@@ -26,6 +26,8 @@ classes, restyled in AS Travel red (`#d92128`, the logo's red).
   directly at `VITE_API_URL` (…/api/v1) with a Sanctum bearer token in
   `localStorage` (`as.app.token`). It signs in with `device_name:
   as-travel-app`, so signing in here does not sign the user out of the SPA.
+  These sessions expire after `AGENTS_APP_SESSION_MINUTES` on the API
+  (default 30 days); the 401 then sends the user to the login screen.
   The API's `CORS_ALLOWED_ORIGINS` must list this app's origin. `VITE_*`
   values are fixed at build time.
 - **Endpoints used**: `POST/DELETE /users/tokens`, `GET /users/me`,
