@@ -36,7 +36,6 @@ async function submit() {
     <div class="login">
         <div class="login-brand">
             <img src="/app/logo.svg" alt="AS Travel" class="login-logo" width="220" height="51" />
-            <p>Customer requests</p>
         </div>
         <form class="form" novalidate @submit.prevent="submit">
             <label class="field"

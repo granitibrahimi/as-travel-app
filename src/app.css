@@ -1207,12 +1207,6 @@ svg {
     box-shadow: none !important;
 }
 
-.login-brand p {
-    margin-top: 10px;
-    font-size: 15px;
-    letter-spacing: 0.02em;
-}
-
 .login-foot {
     margin: 20px 0 0;
     color: var(--muted);
