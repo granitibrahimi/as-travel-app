@@ -8,6 +8,8 @@ const closing = ref(false);
 const first = ref(null);
 /** pickDialog(): the checked items' keys. */
 const picked = ref([]);
+/** textDialog(): the typed text. */
+const text = ref('');
 const allPicked = () => picked.value.length === state.dialog.items.length;
 const toggleAll = () => (picked.value = allPicked() ? [] : state.dialog.items.map((i) => i.key));
 
@@ -32,6 +34,7 @@ watch(
     async (dialog) => {
         if (!dialog) return;
         picked.value = [];
+        text.value = '';
         await nextTick();
         (Array.isArray(first.value) ? first.value[0] : first.value)?.focus();
     },
@@ -81,6 +84,23 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKey));
                             :class="state.dialog.danger ? 'btn-confirm-danger' : 'btn-primary'"
                             :disabled="picked.length === 0"
                             @click="close([...picked])"
+                        >
+                            {{ state.dialog.confirmLabel }}
+                        </button>
+                    </div>
+                </template>
+                <template v-else-if="state.dialog.kind === 'text'">
+                    <label class="field">
+                        <span v-if="state.dialog.label">{{ state.dialog.label }}</span>
+                        <textarea ref="first" v-model="text" rows="8" :placeholder="state.dialog.placeholder" />
+                    </label>
+                    <div class="confirm-actions">
+                        <button type="button" class="btn btn-secondary" @click="close(null)">{{ state.dialog.cancelLabel }}</button>
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            :disabled="state.dialog.required && !text.trim()"
+                            @click="close(text.trim())"
                         >
                             {{ state.dialog.confirmLabel }}
                         </button>

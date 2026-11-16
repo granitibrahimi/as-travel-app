@@ -10,7 +10,7 @@ import Shell from '../components/Shell.vue';
 import StatusPill from '../components/StatusPill.vue';
 import { api } from '../lib/api';
 import { contactLink, whatsappLink } from '../lib/format';
-import { can, choiceDialog, confirmDialog, refreshScreen, render, restoreScroll, state, toast } from '../store';
+import { can, choiceDialog, confirmDialog, refreshScreen, render, restoreScroll, state, textDialog, toast } from '../store';
 
 const props = defineProps({ params: Array, path: String, tab: String });
 const id = Number(props.params[0]);
@@ -41,12 +41,26 @@ async function setStatus(status, { title, message, confirmLabel, danger = false 
     }
 }
 
-const offerSent = () =>
-    setStatus(STATUS.OFFER_SENT, {
-        title: 'Offer sent?',
-        message: `The request from ${task.value.customer_name} is closed, and the responsible agents are notified.`,
-        confirmLabel: 'Offer sent',
+// Offer sent: the agent pastes the offer they sent before the request is closed.
+async function offerSent() {
+    const offerText = await textDialog({
+        title: 'Paste the offer you sent',
+        message: `Paste the offer exactly as you sent it to ${task.value.customer_name}. The request is closed and the responsible agents are notified.`,
+        label: 'Offer sent to the customer',
+        placeholder: 'Paste the offer text here…',
+        confirmLabel: 'Mark as offer sent',
     });
+    if (!offerText) return;
+    busy.value = true;
+    try {
+        await api(`/simple-tasks/${id}/status`, { method: 'PUT', body: { status: STATUS.OFFER_SENT, offer_text: offerText } });
+        toast('Marked as Offer sent.');
+        refreshScreen();
+    } catch (e) {
+        toast(e.message);
+        busy.value = false;
+    }
+}
 const spam = () =>
     setStatus(STATUS.SPAM, {
         title: 'Mark as spam?',
@@ -134,6 +148,11 @@ onMounted(async () => {
             <template v-if="task.description">
                 <h2 class="section-title">Request</h2>
                 <div class="note-card">{{ task.description }}</div>
+            </template>
+
+            <template v-if="task.offer_text">
+                <h2 class="section-title">Offer sent<span v-if="task.offer_sent_at"> · {{ task.offer_sent_at }}</span></h2>
+                <div class="note-card">{{ task.offer_text }}</div>
             </template>
 
             <div class="details">

@@ -95,6 +95,18 @@ export function choiceDialog({ title, message = '', choices, cancelLabel = 'Canc
     });
 }
 
+/**
+ * Asks for a text (a textarea in the app's sheet). The confirm button stays
+ * disabled until something is typed when `required`. Resolves the trimmed
+ * text, or null on Cancel.
+ */
+export function textDialog({ title, message = '', label = '', placeholder = '', confirmLabel = 'Save', cancelLabel = 'Cancel', required = true }) {
+    return new Promise((resolve) => {
+        state.dialog?.resolve(state.dialog.kind === 'confirm' ? false : null);
+        state.dialog = { kind: 'text', title, message, label, placeholder, confirmLabel, cancelLabel, required, resolve };
+    });
+}
+
 // ── Unread notifications (the "Notifications" tab badge) ────────────────
 
 export async function refreshUnread() {
