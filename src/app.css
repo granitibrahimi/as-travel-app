@@ -1216,6 +1216,8 @@ svg {
 
 .pill.is-blue { background: var(--blue-soft); color: var(--blue); box-shadow: none; }
 .pill.is-muted { background: var(--surface-2); color: var(--muted); }
+.pill.is-urgent { background: var(--accent); color: #fff; box-shadow: none; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; }
+.row-title .pill.is-urgent { margin-left: 6px; vertical-align: middle; }
 
 .chip-btn.is-small {
     padding: 5px 11px;
