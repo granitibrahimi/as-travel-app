@@ -1206,8 +1206,16 @@ svg {
     position: relative;
 }
 
-.tab-badge {
-    top: -26px;
+/* The unread badge sits on the bell's top-right corner. */
+.tab-icon {
+    display: inline-flex;
+}
+
+.tab .tab-badge {
+    top: -5px;
+    right: auto;
+    left: calc(100% - 9px);
+    box-shadow: 0 0 0 2px var(--surface);
 }
 
 .appbar-logo {
