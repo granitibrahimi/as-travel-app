@@ -1,7 +1,7 @@
 <script setup>
-// / — the customer requests: assigned to me by default; with
-// simpleTasks.listAll also unassigned / everyone's. Active (open, assigned)
-// by default, or finished (offer sent, spam). Search by customer or #id.
+// / — the customer requests the user can see (an agent: the ones assigned to
+// or created by them; simpleTasks.listAll: everyone's). Active (open,
+// assigned) by default, or finished (offer sent, spam). Search by customer or #id.
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
 import ErrorBox from '../components/ErrorBox.vue';
 import Icon from '../components/Icon';
@@ -9,29 +9,19 @@ import Loading from '../components/Loading.vue';
 import Shell from '../components/Shell.vue';
 import StatusPill from '../components/StatusPill.vue';
 import { api, query } from '../lib/api';
-import { canListRequests, memory, render, restoreScroll, seesAllRequests, state } from '../store';
+import { canListRequests, memory, render, restoreScroll, state } from '../store';
 
 const props = defineProps({ params: Array, path: String, tab: String });
 const key = props.path;
 const shell = ref(null);
 const saved = memory.get(key) ?? {};
 const allowed = canListRequests();
-const seesAll = seesAllRequests();
-
-const SCOPES = seesAll
-    ? [
-          ['mine', 'Mine'],
-          ['none', 'Unassigned'],
-          ['all', 'All'],
-      ]
-    : [];
 const STATUSES = [
     ['active', 'Active'],
     ['finished', 'Finished'],
     ['', 'All'],
 ];
 
-const scope = ref(saved.scope ?? (seesAll ? 'mine' : 'all'));
 const status = ref(saved.status ?? 'active');
 const search = ref(saved.search ?? '');
 const items = shallowRef(null);
@@ -43,11 +33,9 @@ const busy = ref(false);
 let searchTimer = null;
 let loadToken = 0;
 
-const remember = () => memory.set(key, { ...(memory.get(key) ?? {}), scope: scope.value, status: status.value, search: search.value });
+const remember = () => memory.set(key, { ...(memory.get(key) ?? {}), status: status.value, search: search.value });
 
 const params = computed(() => ({
-    mine: scope.value === 'mine' ? 1 : undefined,
-    assigned_to: scope.value === 'none' ? 'none' : undefined,
     status: status.value,
     q: search.value.trim(),
 }));
@@ -74,9 +62,8 @@ async function load({ more = false } = {}) {
     }
 }
 
-function pick(which, value) {
-    if (which === 'scope') scope.value = value;
-    else status.value = value;
+function pick(value) {
+    status.value = value;
     remember();
     memory.set(key, { ...(memory.get(key) ?? {}), pages: 1, scroll: 0 });
     saved.pages = 1;
@@ -95,8 +82,7 @@ function onSearch() {
 
 const emptyText = computed(() => {
     if (search.value.trim()) return 'No request matches your search.';
-    if (scope.value === 'mine') return status.value === 'active' ? 'No open requests assigned to you. 🎉' : 'No requests assigned to you here.';
-    if (scope.value === 'none') return 'Every active request has an agent.';
+    if (status.value === 'active') return 'No open requests. 🎉';
     return 'No requests here.';
 });
 
@@ -121,13 +107,8 @@ onBeforeUnmount(() => clearTimeout(searchTimer));
                 <Icon name="search" />
                 <input v-model="search" type="search" placeholder="Customer, phone or #number" enterkeyhint="search" @input="onSearch" />
             </label>
-            <div v-if="SCOPES.length" class="filter-chips">
-                <button v-for="[value, label] in SCOPES" :key="value" type="button" class="chip-btn" :class="{ 'is-active': scope === value }" @click="pick('scope', value)">
-                    {{ label }}
-                </button>
-            </div>
-            <div class="filter-chips">
-                <button v-for="[value, label] in STATUSES" :key="value" type="button" class="chip-btn is-small" :class="{ 'is-active': status === value }" @click="pick('status', value)">
+            <div class="filter-chips is-full">
+                <button v-for="[value, label] in STATUSES" :key="value" type="button" class="chip-btn" :class="{ 'is-active': status === value }" @click="pick(value)">
                     {{ label }}
                 </button>
             </div>
@@ -145,7 +126,7 @@ onBeforeUnmount(() => clearTimeout(searchTimer));
                             <div class="row-sub request-meta">
                                 <StatusPill :status="r.status" />
                                 <span>{{ r.source.name }}</span>
-                                <span v-if="scope !== 'mine' && r.assigned_to">· {{ r.assigned_to.id === state.profile.id ? 'You' : r.assigned_to.name }}</span>
+                                <span v-if="r.assigned_to">· {{ r.assigned_to.id === state.profile.id ? 'You' : r.assigned_to.name }}</span>
                             </div>
                             <div v-if="r.description" class="row-sub request-desc">{{ r.description }}</div>
                             <div class="row-sub">{{ r.created_at }}</div>
