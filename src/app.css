@@ -691,6 +691,27 @@ svg {
     -webkit-appearance: none;
 }
 
+.field textarea {
+    width: 100%;
+    min-height: 160px;
+    max-height: 45vh;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    outline: 0;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: 16px;
+    line-height: 1.4;
+    resize: vertical;
+}
+
+.confirm-panel .field {
+    margin-top: 12px;
+}
+
+.field textarea:focus,
 .field select:focus,
 .field input:focus {
     border-color: var(--accent);
