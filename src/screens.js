@@ -9,7 +9,7 @@ import ReminderScreen from './screens/ReminderScreen.vue';
 import RemindersScreen from './screens/RemindersScreen.vue';
 import RequestScreen from './screens/RequestScreen.vue';
 import RequestsScreen from './screens/RequestsScreen.vue';
-import { canSeeNotifications } from './store';
+import { can, canSeeNotifications } from './store';
 
 export function routesFor(profile) {
     if (!profile) return [[/^\/login$/, LoginScreen, null]];
@@ -18,10 +18,14 @@ export function routesFor(profile) {
         [/^\/$/, RequestsScreen, 'requests'],
         [/^\/requests\/(\d+)$/, RequestScreen, 'requests'],
         ...(canSeeNotifications() ? [[/^\/notifications$/, NotificationsScreen, 'notifications']] : []),
-        [/^\/reminders$/, RemindersScreen, 'reminders'],
-        [/^\/reminders\/new$/, ReminderFormScreen, 'reminders'],
-        [/^\/reminders\/(\d+)\/edit$/, ReminderFormScreen, 'reminders'],
-        [/^\/reminders\/(\d+)$/, ReminderScreen, 'reminders'],
+        ...(can('reminders.use')
+            ? [
+                  [/^\/reminders$/, RemindersScreen, 'reminders'],
+                  [/^\/reminders\/new$/, ReminderFormScreen, 'reminders'],
+                  [/^\/reminders\/(\d+)\/edit$/, ReminderFormScreen, 'reminders'],
+                  [/^\/reminders\/(\d+)$/, ReminderScreen, 'reminders'],
+              ]
+            : []),
         [/^\/profile$/, ProfileScreen, 'profile'],
     ];
 }

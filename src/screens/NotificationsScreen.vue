@@ -7,7 +7,7 @@ import Icon from '../components/Icon';
 import Loading from '../components/Loading.vue';
 import Shell from '../components/Shell.vue';
 import { api } from '../lib/api';
-import { navigate, refreshUnread, render, restoreScroll, state } from '../store';
+import { can, navigate, refreshUnread, render, restoreScroll, state } from '../store';
 
 const props = defineProps({ params: Array, path: String, tab: String });
 const shell = ref(null);
@@ -18,7 +18,7 @@ const lastPage = ref(1);
 const busy = ref(false);
 
 /** A notification's link inside this app: a request (same path as the SPA) or a reminder. */
-const appLink = (url) => (url && /^\/(requests|reminders)\/\d+$/.test(url) ? url : null);
+const appLink = (url) => (url && (/^\/requests\/\d+$/.test(url) || (can('reminders.use') && /^\/reminders\/\d+$/.test(url))) ? url : null);
 
 async function load() {
     busy.value = true;
