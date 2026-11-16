@@ -1,0 +1,19 @@
+{
+    "id": "/",
+    "name": "AS Travel",
+    "short_name": "AS Travel",
+    "description": "Customer requests for the AS Travel team: get notified when a request is assigned to you.",
+    "lang": "en",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#f4f4f5",
+    "theme_color": "#d92128",
+    "categories": ["business", "productivity", "travel"],
+    "icons": [
+        { "src": "/app/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+        { "src": "/app/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+        { "src": "/app/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    ]
+}

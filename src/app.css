@@ -1,0 +1,1374 @@
+/* The AS Travel app: a phone-first, app-like look (the same frame as the
+   Exclusive Agents app): fixed app bar and bottom tab bar, grouped lists,
+   big touch targets. AS Travel red is the accent; follows the phone's dark mode. */
+
+/* AS Travel brand: the logo's red (#d92128) is the accent. */
+:root {
+    --brand: #d92128;
+    --accent: #d92128;
+    --accent-strong: #b3181f;
+    --accent-soft: #fde8e9;
+    --on-accent: #ffffff;
+    --appbar: #d92128;
+    --bg: #f4f4f5;
+    --surface: #ffffff;
+    --surface-2: #f8f8f9;
+    --text: #1c1b1f;
+    --muted: #6b6b72;
+    --line: #e4e4e7;
+    --green: #16794a;
+    --green-soft: #e3f4ea;
+    --red: #b4232c;
+    --red-soft: #fbe9ea;
+    --amber: #9a5b00;
+    --amber-soft: #fdf1dc;
+    --blue: #1d5fbf;
+    --blue-soft: #e5eefb;
+    --shadow: 0 1px 2px rgb(20 16 16 / 6%), 0 1px 1px rgb(20 16 16 / 4%);
+    --radius: 14px;
+    --appbar-h: 56px;
+    --tabbar-h: 60px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+    color-scheme: light dark;
+}
+
+/* Dark: follows the phone unless Profile picks Light / Dark (data-theme on <html>). */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+        --accent: #f2585e;
+        --accent-strong: #ff7d82;
+        --accent-soft: #3a1618;
+        --on-accent: #2b0608;
+        --appbar: #3d1214;
+        --bg: #111113;
+        --surface: #1b1b1e;
+        --surface-2: #232327;
+        --text: #ededef;
+        --muted: #9e9ea6;
+        --line: #2e2e33;
+        --green: #4cc287;
+        --green-soft: #143024;
+        --red: #f0727a;
+        --red-soft: #3a1c1f;
+        --amber: #f2b45a;
+        --amber-soft: #3a2a12;
+        --shadow: none;
+    }
+}
+
+:root[data-theme='dark'] {
+    --accent: #f2585e;
+    --accent-strong: #ff7d82;
+    --accent-soft: #3a1618;
+    --on-accent: #2b0608;
+    --appbar: #3d1214;
+    --bg: #111113;
+    --surface: #1b1b1e;
+    --surface-2: #232327;
+    --text: #ededef;
+    --muted: #9e9ea6;
+    --line: #2e2e33;
+    --green: #4cc287;
+    --green-soft: #143024;
+    --red: #f0727a;
+    --red-soft: #3a1c1f;
+    --amber: #f2b45a;
+    --amber-soft: #3a2a12;
+    --shadow: none;
+    color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+    color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.4 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+    overscroll-behavior: none;
+    touch-action: manipulation; /* no double-tap zoom */
+}
+
+/* Pinned to the whole screen, so on an installed iPhone app nothing shows
+   below the tab bar (height: 100% stops short of the home-indicator area). */
+/* An installed iPhone app can leave a band below the layout, by the home
+   indicator, painted with the page background: on screens with a tab bar,
+   paint it the tab bar's colour so the bar reaches the bottom edge. */
+html:has(.tabbar),
+html:has(.tabbar) body {
+    background: var(--surface);
+}
+
+#app {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+}
+
+/* iOS 26 installed apps with a translucent status bar get a viewport that is
+   short by the status bar's height (WebKit bug 301108), and fixed content
+   stops painting at that edge. A taller page makes WebKit size it to the
+   whole screen; min() keeps it from overshooting where the bug isn't. */
+@media (display-mode: standalone) {
+    html {
+        min-height: min(100lvh, calc(100% + env(safe-area-inset-top)));
+    }
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button,
+input {
+    font: inherit;
+    color: inherit;
+}
+
+svg {
+    display: block;
+    flex: none;
+}
+
+/* ── Screen chrome ───────────────────────────────────────────────────── */
+
+.screen {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+    background: var(--bg);
+}
+
+.appbar {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-height: calc(var(--appbar-h) + var(--safe-top));
+    padding: var(--safe-top) 8px 0 16px;
+    background: var(--appbar);
+    color: #fff;
+}
+
+.appbar.has-back {
+    padding-left: 4px;
+}
+
+.appbar-titles {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 0;
+}
+
+.appbar h1 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.appbar p {
+    margin: 1px 0 0;
+    font-size: 13px;
+    opacity: 0.8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.appbar-back,
+.appbar-action {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+}
+
+.appbar-back svg,
+.appbar-action svg {
+    width: 24px;
+    height: 24px;
+}
+
+.appbar-back:active,
+.appbar-action:active {
+    background: rgb(255 255 255 / 15%);
+}
+
+.content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding: 16px 16px 24px;
+}
+
+.tabbar {
+    flex: none;
+    display: flex;
+    /* The home indicator sits over the lower part of the safe area, like a native tab bar. */
+    height: calc(var(--tabbar-h) + max(var(--safe-bottom) - 12px, 0px));
+    padding-bottom: max(var(--safe-bottom) - 12px, 0px);
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+}
+
+.tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    color: var(--muted);
+    font-size: 11.5px;
+    font-weight: 600;
+}
+
+.tab svg {
+    width: 25px;
+    height: 25px;
+}
+
+/* Seven tabs (admins): a little smaller so "Barnatoret" fits a phone. */
+.tabbar.is-crowded .tab {
+    min-width: 0;
+    font-size: 10px;
+    letter-spacing: -0.01em;
+}
+
+.tabbar.is-crowded .tab svg {
+    width: 23px;
+    height: 23px;
+}
+
+.tab.is-active {
+    color: var(--accent);
+}
+
+/* A super agent has six tabs (Sot, Verifikimi, Zhvendos, Depo, Anulimet, Profili)… */
+.tabbar:has(.tab:nth-child(6)) .tab {
+    min-width: 0;
+    font-size: 10.5px;
+    letter-spacing: -0.01em;
+}
+
+.tabbar:has(.tab:nth-child(6)) .tab svg {
+    width: 23px;
+    height: 23px;
+}
+
+/* …and seven with "Anulimet" too. */
+.tabbar:has(.tab:nth-child(7)) .tab {
+    font-size: 9.5px;
+    letter-spacing: -0.02em;
+}
+
+.tabbar:has(.tab:nth-child(7)) .tab svg {
+    width: 21px;
+    height: 21px;
+}
+
+.splash,
+.loading {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    min-height: 160px;
+}
+
+.splash img {
+    border-radius: 18px;
+}
+
+.spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--line);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ── Search ──────────────────────────────────────────────────────────── */
+
+.searchbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 48px;
+    margin-top: 14px;
+    padding: 0 14px;
+    border-radius: 12px;
+    background: var(--surface);
+    box-shadow: var(--shadow), inset 0 0 0 1px var(--line);
+    color: var(--muted);
+}
+
+.searchbar:first-child {
+    margin-top: 0;
+}
+
+.searchbar svg {
+    width: 20px;
+    height: 20px;
+}
+
+.searchbar input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--text);
+    font-size: 16px; /* 16px+ keeps iOS from zooming in */
+}
+
+.searchbar:focus-within {
+    box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+/* ── Lists ───────────────────────────────────────────────────────────── */
+
+.list {
+    margin-top: 14px;
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.section-title + .list {
+    margin-top: 0;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 60px;
+    padding: 12px 10px 12px 16px;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+}
+
+.row:last-child {
+    border-bottom: 0;
+}
+
+.row:active,
+.delivery-main:active {
+    background: var(--surface-2);
+}
+
+.row-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.row-title {
+    font-weight: 620;
+    line-height: 1.25;
+}
+
+/* A notification the agent hasn't seen yet (Njoftimet). */
+.unread-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    vertical-align: middle;
+}
+
+.row-sub {
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.row-chevron {
+    color: var(--muted);
+    opacity: 0.6;
+}
+
+.row-chevron svg {
+    width: 18px;
+    height: 18px;
+}
+
+.row-amount {
+    font-weight: 650;
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.row-amount.is-debt {
+    color: var(--red);
+}
+
+.count {
+    display: grid;
+    place-items: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 8px;
+    border-radius: 99px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.count.is-zero {
+    background: var(--surface-2);
+    color: var(--muted);
+    box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.count.is-done {
+    background: var(--green);
+}
+
+.count svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────── */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 48px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 12px;
+    font-weight: 650;
+    cursor: pointer;
+    transition: transform 0.08s, opacity 0.15s;
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+}
+
+.btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: var(--on-accent);
+}
+
+.btn-primary:active {
+    background: var(--accent-strong);
+}
+
+.btn-secondary {
+    background: var(--surface);
+    color: var(--accent);
+    box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.btn-danger {
+    background: var(--surface);
+    color: var(--red);
+    box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.btn-link {
+    padding: 0 10px;
+    background: transparent;
+    color: var(--muted);
+    text-decoration: underline;
+}
+
+.btn-icon {
+    width: 48px;
+    padding: 0;
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+}
+
+.btn-deliver {
+    flex: 1;
+    font-size: 17px;
+}
+
+.btn-block {
+    display: flex;
+    width: 100%;
+    margin-top: 14px;
+}
+
+.btn-lg {
+    height: 54px;
+    font-size: 17px;
+}
+
+.btn.is-busy {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+/* ── Profile, forms, misc ────────────────────────────────────────────── */
+
+.profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 20px 0 6px;
+    text-align: center;
+}
+
+.profile strong {
+    margin-top: 10px;
+    font-size: 20px;
+}
+
+.profile span {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.avatar {
+    display: grid;
+    place-items: center;
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.segmented {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    margin-top: 14px;
+    padding: 4px;
+    border-radius: 12px;
+    background: var(--surface);
+    box-shadow: var(--shadow), inset 0 0 0 1px var(--line);
+}
+
+.segmented button {
+    height: 40px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--muted);
+    font-weight: 650;
+    cursor: pointer;
+}
+
+.segmented button.is-active {
+    background: var(--accent);
+    color: var(--on-accent);
+}
+
+.login {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 420px;
+    height: 100%;
+    overflow-y: auto;
+    margin: 0 auto;
+    padding: calc(24px + var(--safe-top)) 20px calc(24px + var(--safe-bottom));
+}
+
+.login-brand {
+    margin-bottom: 28px;
+    text-align: center;
+}
+
+.login-brand img {
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+}
+
+.login-brand h1 {
+    margin: 14px 0 2px;
+    font-size: 26px;
+}
+
+.login-brand p {
+    margin: 0;
+    color: var(--muted);
+}
+
+.form {
+    display: grid;
+    gap: 14px;
+}
+
+.field {
+    display: grid;
+    gap: 6px;
+}
+
+.field span {
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.field input {
+    height: 50px;
+    padding: 0 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    outline: 0;
+    background: var(--surface);
+    font-size: 16px;
+}
+
+.field select {
+    width: 100%;
+    min-width: 0;
+    height: 50px;
+    padding: 0 42px 0 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    outline: 0;
+    background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center;
+    color: var(--text);
+    font: inherit;
+    font-size: 16px;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.field select:focus,
+.field input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+}
+
+.form .btn-block {
+    margin-top: 6px;
+}
+
+.form-error {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--red-soft);
+    color: var(--red);
+    font-size: 14px;
+}
+
+.hint {
+    margin: 12px 4px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.empty {
+    display: grid;
+    justify-items: center;
+    gap: 10px;
+    padding: 36px 16px;
+    color: var(--muted);
+    text-align: center;
+}
+
+.empty p {
+    margin: 0;
+}
+
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(var(--tabbar-h) + var(--safe-bottom) + 14px);
+    z-index: 10;
+    max-width: calc(100% - 32px);
+    padding: 12px 18px;
+    border-radius: 12px;
+    background: var(--text);
+    color: var(--bg);
+    font-size: 15px;
+    box-shadow: 0 6px 20px rgb(0 0 0 / 20%);
+    transform: translateX(-50%);
+    animation: toast-in 0.2s ease-out;
+    transition: opacity 0.3s;
+}
+
+.toast.is-hiding {
+    opacity: 0;
+}
+
+@keyframes toast-in {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 10px);
+    }
+}
+
+/* ── Confirm sheet (confirmDialog() — in place of the browser's confirm()) ── */
+
+.confirm {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.confirm-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgb(0 0 0 / 40%);
+    animation: confirm-fade 0.15s ease-out;
+}
+
+.confirm-panel {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    padding: 22px 18px calc(18px + var(--safe-bottom));
+    border-radius: 18px 18px 0 0;
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 -8px 30px rgb(0 0 0 / 18%);
+    animation: confirm-up 0.18s ease-out;
+}
+
+.confirm-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.confirm-panel.has-close .confirm-title,
+.confirm-panel.has-close .confirm-message {
+    padding-right: 36px;
+}
+
+.confirm-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+}
+
+.confirm-close:hover,
+.confirm-close:focus-visible {
+    background: var(--line);
+    color: var(--text);
+}
+
+.confirm-message {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+.confirm-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-confirm-danger {
+    background: var(--red);
+    color: var(--bg);
+}
+
+/* choiceDialog(): one button per answer, stacked; the X in the corner cancels. */
+.confirm-actions.is-stacked {
+    grid-template-columns: 1fr;
+}
+
+.confirm-actions.is-stacked [data-cancel] {
+    order: 1;
+}
+
+.btn-confirm-amber {
+    background: var(--amber);
+    color: var(--bg);
+}
+
+/* pickDialog(): a checkbox per item ("Cila faturë nuk u pranua?"). */
+.pick-list {
+    display: grid;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.pick-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    cursor: pointer;
+}
+
+.pick-item.is-picked {
+    border-color: var(--red);
+}
+
+.pick-item input {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    accent-color: var(--red);
+}
+
+.pick-label {
+    font-weight: 600;
+}
+
+.pick-detail {
+    color: var(--muted);
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.pick-all {
+    justify-self: start;
+    padding: 4px 0;
+    border: 0;
+    background: none;
+    color: var(--accent);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.confirm-actions .btn:disabled {
+    opacity: 0.5;
+}
+
+.confirm.is-closing {
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+@media (min-width: 600px) {
+    .confirm {
+        align-items: center;
+        padding: 16px;
+    }
+
+    .confirm-panel {
+        max-width: 400px;
+        padding-bottom: 18px;
+        border-radius: var(--radius);
+    }
+}
+
+@keyframes confirm-fade {
+    from { opacity: 0; }
+}
+
+@keyframes confirm-up {
+    from { transform: translateY(24px); opacity: 0; }
+}
+
+/* ── "Aktivizo njoftimet" popup (PushPrompt.vue): a card in the middle of the screen ── */
+
+.confirm--center {
+    align-items: center;
+    padding: calc(20px + var(--safe-top)) 20px calc(20px + var(--safe-bottom));
+}
+
+.confirm--center .confirm-backdrop {
+    background: rgb(0 0 0 / 60%);
+}
+
+.push-prompt {
+    max-width: 360px;
+    max-height: 100%;
+    overflow-y: auto;
+    padding: 26px 20px 20px;
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    box-shadow: 0 20px 60px rgb(0 0 0 / 35%);
+    text-align: center;
+    animation: push-prompt-in 0.2s ease-out;
+}
+
+@keyframes push-prompt-in {
+    from { opacity: 0; transform: scale(0.94); }
+}
+
+.push-prompt-icon {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 14px;
+    border-radius: 20px;
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+.push-prompt-icon svg {
+    width: 34px;
+    height: 34px;
+}
+
+.push-prompt .confirm-message {
+    margin-bottom: 16px;
+}
+
+.push-prompt-points {
+    display: grid;
+    gap: 10px;
+    margin: 0 0 16px;
+    padding: 16px;
+    border-radius: var(--radius);
+    background: var(--bg);
+    list-style: none;
+    font-size: 15px;
+    text-align: left;
+}
+
+.push-prompt-points li {
+    display: flex;
+    gap: 10px;
+}
+
+.push-prompt-points svg {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    color: var(--green);
+}
+
+.push-prompt .form-error {
+    margin-bottom: 12px;
+}
+
+.push-prompt-later {
+    margin-top: 10px;
+}
+
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 22px 4px 8px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.section-title span {
+    padding: 1px 8px;
+    border-radius: 99px;
+    background: var(--line);
+    color: var(--text);
+    font-size: 12px;
+}
+
+.details {
+    margin-top: 14px;
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.details:empty {
+    display: none;
+}
+
+.detail {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 50px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--line);
+}
+
+.detail:last-child {
+    border-bottom: 0;
+}
+
+.detail span {
+    flex: none;
+    width: 96px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.detail strong {
+    flex: 1;
+    font-weight: 560;
+    overflow-wrap: anywhere;
+}
+
+.detail-link {
+    color: var(--accent);
+}
+
+.detail-link svg {
+    width: 20px;
+    height: 20px;
+}
+
+.pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 99px;
+    background: var(--surface-2);
+    box-shadow: inset 0 0 0 1px var(--line);
+    color: var(--muted);
+    font-size: 12.5px;
+    font-weight: 620;
+    line-height: 1.5;
+    white-space: nowrap;
+}
+
+.pill.is-green { background: var(--green-soft); color: var(--green); box-shadow: none; }
+.pill.is-red { background: var(--red-soft); color: var(--red); box-shadow: none; }
+.pill.is-amber { background: var(--amber-soft); color: var(--amber); box-shadow: none; }
+.pill.is-accent { background: var(--accent-soft); color: var(--accent); box-shadow: none; }
+
+.tab-badge {
+    position: absolute;
+    top: -30px;
+    right: -14px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 99px;
+    background: var(--red);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
+}
+
+.tab-badge[hidden] {
+    display: none;
+}
+
+.filter-chips {
+    display: flex;
+    gap: 6px;
+    margin: 0 -16px 4px;
+    padding: 0 16px 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.chip-btn {
+    flex: none;
+    padding: 7px 12px;
+    border: 0;
+    border-radius: 99px;
+    background: var(--surface);
+    box-shadow: inset 0 0 0 1px var(--line);
+    color: var(--text);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.chip-btn span {
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.chip-btn.is-active {
+    background: var(--accent);
+    color: var(--on-accent);
+    box-shadow: none;
+}
+
+.chip-btn.is-active span {
+    color: inherit;
+    opacity: 0.75;
+}
+
+.role-pill {
+    margin-top: 4px;
+    padding: 2px 10px;
+    border-radius: 99px;
+    background: var(--accent-soft);
+    color: var(--accent) !important;
+    font-weight: 650;
+}
+
+/* ── AS Travel: requests ─────────────────────────────────────────────── */
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+        --blue: #7fb0ff;
+        --blue-soft: #16243b;
+    }
+}
+
+:root[data-theme='dark'] {
+    --blue: #7fb0ff;
+    --blue-soft: #16243b;
+}
+
+.tab span {
+    position: relative;
+}
+
+.tab-badge {
+    top: -26px;
+}
+
+.appbar-logo {
+    flex: none;
+    width: 34px;
+    height: 34px;
+    margin-left: -4px;
+}
+
+.login-brand {
+    text-align: center;
+}
+
+.login-logo {
+    width: min(240px, 70vw);
+    height: auto;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+.login-brand p {
+    margin-top: 10px;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+}
+
+.login-foot {
+    margin: 20px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+}
+
+.pill.is-blue { background: var(--blue-soft); color: var(--blue); box-shadow: none; }
+.pill.is-muted { background: var(--surface-2); color: var(--muted); }
+
+.chip-btn.is-small {
+    padding: 5px 11px;
+    font-size: 13px;
+}
+
+.request-id {
+    color: var(--muted);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.request-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.request-desc {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    color: var(--text);
+    opacity: 0.85;
+}
+
+.request-head {
+    margin-top: 4px;
+    padding: 18px 16px;
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+}
+
+.request-head-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.request-source {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.request-head h2 {
+    margin: 12px 0 2px;
+    font-size: 22px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.request-contact {
+    margin: 0;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+}
+
+.contact-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.contact-actions .btn {
+    gap: 8px;
+}
+
+.btn-whatsapp {
+    color: #128c4a;
+}
+
+.note-card {
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.request-actions {
+    margin-top: 6px;
+}
+
+.request-actions .btn-block {
+    margin-top: 12px;
+}
+
+.history {
+    margin: 0;
+    padding: 4px 16px;
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    list-style: none;
+}
+
+.history li {
+    position: relative;
+    padding: 12px 0 12px 20px;
+    border-bottom: 1px solid var(--line);
+}
+
+.history li:last-child {
+    border-bottom: 0;
+}
+
+.history li::before {
+    content: '';
+    position: absolute;
+    top: 18px;
+    left: 2px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+}
+
+.history li:not(:first-child)::before {
+    background: var(--line);
+}
+
+.history-title {
+    font-size: 15px;
+    overflow-wrap: anywhere;
+}
+
+.history-sub {
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.profile-note {
+    font-size: 13px;
+}
+
+/* A long list of agents in the "Assign" sheet scrolls inside it. */
+.confirm-panel {
+    max-height: calc(100% - 40px - var(--safe-top));
+    overflow-y: auto;
+}
