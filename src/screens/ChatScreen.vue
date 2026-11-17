@@ -125,12 +125,12 @@ onUnmounted(() => document.removeEventListener('visibilitychange', refresh));
 </script>
 
 <template>
-    <Shell ref="shell" tab="chat" title="Asistenti AS Travel" subtitle="Përgjigjet sipas udhëzimeve të zyrës" class="is-chat">
+    <Shell ref="shell" tab="chat" title="AS Travel Assistant" subtitle="Përgjigjet sipas udhëzimeve të zyrës" class="is-chat">
         <ErrorBox v-if="error && !messages" :error="error" @retry="render()" />
         <Loading v-else-if="!messages" />
         <div v-else class="thread">
             <section v-if="messages.length === 0 && !typing" class="chat-intro">
-                <span class="chat-intro-logo"><img src="/app/logo-mark-white.svg" alt="" width="40" height="40" /></span>
+                <span class="chat-intro-logo"><img src="/app/logo-mark-white.svg" alt="" width="40" height="40" /><b class="ai-badge">AI</b></span>
                 <h2>Pyete asistentin</h2>
                 <p>Çmime, procedura dhe rregulla të zyrës, sipas udhëzimeve të AS Travel.</p>
                 <div class="suggestions">
@@ -140,14 +140,14 @@ onUnmounted(() => document.removeEventListener('visibilitychange', refresh));
 
             <div v-for="m in messages" :key="m.id" class="message" :class="`is-${m.role}`">
                 <template v-if="m.role === 'assistant'">
-                    <span class="message-avatar"><img src="/app/logo-mark-white.svg" alt="" width="18" height="18" /></span>
+                    <span class="message-avatar"><img src="/app/logo-mark-white.svg" alt="" width="18" height="18" /><b class="ai-badge is-small">AI</b></span>
                     <div class="message-body prose" v-html="markdown(m.content)" />
                 </template>
                 <div v-else class="message-body">{{ m.content }}</div>
             </div>
 
             <div v-if="typing" class="message is-assistant">
-                <span class="message-avatar"><img src="/app/logo-mark-white.svg" alt="" width="18" height="18" /></span>
+                <span class="message-avatar"><img src="/app/logo-mark-white.svg" alt="" width="18" height="18" /><b class="ai-badge is-small">AI</b></span>
                 <div class="message-body"><span class="dots"><i></i><i></i><i></i></span></div>
             </div>
         </div>

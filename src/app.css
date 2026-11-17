@@ -1561,6 +1561,7 @@ svg {
 }
 
 .message-avatar {
+    position: relative;
     display: grid;
     place-items: center;
     flex: none;
@@ -1698,6 +1699,7 @@ svg {
 }
 
 .chat-intro-logo {
+    position: relative;
     display: grid;
     place-items: center;
     width: 64px;
@@ -1803,4 +1805,27 @@ svg {
 
 html:has(.composer) .toast {
     bottom: calc(var(--tabbar-h) + var(--safe-bottom) + 76px);
+}
+
+/* The "AI" tag on the assistant's logo. */
+.ai-badge {
+    position: absolute;
+    right: -8px;
+    bottom: -6px;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #7c3aed, #2563eb);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    box-shadow: 0 0 0 2px var(--bg);
+}
+
+.ai-badge.is-small {
+    right: -5px;
+    bottom: -4px;
+    padding: 0 3px;
+    font-size: 8px;
 }

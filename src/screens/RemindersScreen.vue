@@ -86,7 +86,10 @@ onMounted(async () => {
                     </div>
                     <div class="row-main">
                         <div class="row-title reminder-text">{{ r.description }}</div>
-                        <div v-if="r.sent" class="row-sub">Sent {{ r.sent_at }}</div>
+                        <div class="row-sub">
+                            <span class="pill" :class="r.source?.id === 2 ? 'is-blue' : 'is-muted'">{{ r.source?.id === 2 ? 'System' : 'You' }}</span>
+                            <template v-if="r.sent"> · Sent {{ r.sent_at }}</template>
+                        </div>
                     </div>
                     <span class="row-chevron"><Icon name="chevron" /></span>
                 </a>
