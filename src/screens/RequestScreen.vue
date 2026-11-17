@@ -3,7 +3,7 @@
 // asked, status and agent, the offers sent, and its history. "Add offer"
 // records an offer (several per request); "In progress" and "Close" move it on (simpleTasks.changeStatus); "Spam" is a flag that leaves the
 // status as it is; "Assign" picks the agent (simpleTasks.assign).
-import { computed, nextTick, onMounted, ref, shallowRef } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
 import ErrorBox from '../components/ErrorBox.vue';
 import Icon from '../components/Icon';
 import Loading from '../components/Loading.vue';
@@ -137,6 +137,21 @@ async function assign() {
         busy.value = false;
     }
 }
+
+// Tell the API this request is open here, so the CRM boards show a "working"
+// icon on its card: a heartbeat every 30 s while visible, "left" on the way out.
+const beat = () => document.visibilityState === 'visible' && api(`/simple-tasks/${id}/viewing`, { method: 'PUT' }).catch(() => {});
+let viewingTimer = null;
+onMounted(() => {
+    beat();
+    viewingTimer = setInterval(beat, 30_000);
+    document.addEventListener('visibilitychange', beat);
+});
+onBeforeUnmount(() => {
+    clearInterval(viewingTimer);
+    document.removeEventListener('visibilitychange', beat);
+    api(`/simple-tasks/${id}/viewing`, { method: 'DELETE' }).catch(() => {});
+});
 
 onMounted(async () => {
     try {
