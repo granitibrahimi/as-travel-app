@@ -15,10 +15,17 @@ import { memory, render, toast } from '../store';
 const DRAFT_KEY = 'chat:draft';
 const SUGGESTIONS = [
     'Sa kushton një çantë shtesë?',
-    'What deposit does a customer pay?',
+    'Sa paradhënie paguan klienti?',
     'Cili është orari i zyrës?',
-    'How do I send an online payment link?',
+    'Si ta dërgoj linkun e pagesës online?',
 ];
+
+// The assistant speaks Albanian only, its errors too (503 already comes in Albanian from the API).
+const ERRORS = {
+    0: 'Nuk ka lidhje me internetin. Provo përsëri.',
+    403: 'Nuk ke qasje në asistentin.',
+    429: 'Shumë pyetje njëherësh. Prit një minutë dhe provo përsëri.',
+};
 
 const shell = ref(null);
 const input = ref(null);
@@ -94,7 +101,7 @@ async function ask(text) {
         draft.value = message;
         await nextTick();
         fit();
-        toast(e.message);
+        toast(ERRORS[e.status] ?? (e.status === 503 ? e.message : 'Diçka shkoi keq. Provo përsëri.'));
     } finally {
         busy.value = false;
     }
@@ -118,14 +125,14 @@ onUnmounted(() => document.removeEventListener('visibilitychange', refresh));
 </script>
 
 <template>
-    <Shell ref="shell" tab="chat" title="AS Travel Assistant" subtitle="Answers from the office instructions" class="is-chat">
+    <Shell ref="shell" tab="chat" title="Asistenti AS Travel" subtitle="Përgjigjet sipas udhëzimeve të zyrës" class="is-chat">
         <ErrorBox v-if="error && !messages" :error="error" @retry="render()" />
         <Loading v-else-if="!messages" />
         <div v-else class="thread">
             <section v-if="messages.length === 0 && !typing" class="chat-intro">
                 <span class="chat-intro-logo"><img src="/app/logo-mark-white.svg" alt="" width="40" height="40" /></span>
-                <h2>Ask the assistant</h2>
-                <p>Prices, procedures and office rules, answered from the AS Travel instructions. Ask in Albanian or English.</p>
+                <h2>Pyete asistentin</h2>
+                <p>Çmime, procedura dhe rregulla të zyrës, sipas udhëzimeve të AS Travel.</p>
                 <div class="suggestions">
                     <button v-for="text in SUGGESTIONS" :key="text" type="button" class="suggestion" @click="ask(text)">{{ text }}</button>
                 </div>
@@ -152,13 +159,13 @@ onUnmounted(() => document.removeEventListener('visibilitychange', refresh));
                     v-model="draft"
                     rows="1"
                     maxlength="4000"
-                    placeholder="Ask anything…"
+                    placeholder="Shkruaj pyetjen…"
                     enterkeyhint="send"
-                    aria-label="Message"
+                    aria-label="Mesazhi"
                     @input="onInput"
                     @keydown="onKeydown"
                 ></textarea>
-                <button type="submit" class="composer-send" aria-label="Send" :disabled="busy || draft.trim() === ''"><Icon name="send" /></button>
+                <button type="submit" class="composer-send" aria-label="Dërgo" :disabled="busy || draft.trim() === ''"><Icon name="send" /></button>
             </form>
         </template>
     </Shell>
