@@ -15,8 +15,13 @@ export const STATUS_PILL = {
     1: 'is-blue', // Open
     2: 'is-amber', // Assigned
     3: 'is-green', // Offer sent
-    4: 'is-muted', // Spam
+    4: 'is-muted', // Spam (old status; spam is a flag now)
+    5: 'is-violet', // In progress
 };
+
+/** The request's destinations as one line (older requests have a single one). */
+export const destinationNames = (task) =>
+    (task?.parent_destinations ?? (task?.parent_destination ? [task.parent_destination] : [])).map((d) => d.name).join(', ');
 
 /** A phone number or e-mail as a link the phone can open, or null. */
 export const contactLink = (contact) => {

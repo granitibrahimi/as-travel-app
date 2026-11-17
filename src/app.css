@@ -1245,6 +1245,9 @@ svg {
 
 .pill.is-blue { background: var(--blue-soft); color: var(--blue); box-shadow: none; }
 .pill.is-muted { background: var(--surface-2); color: var(--muted); }
+.pill.is-violet { background: rgba(124, 58, 237, .12); color: #6d28d9; box-shadow: none; }
+.pill.is-spam { background: #374151; color: #fff; box-shadow: none; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; }
+.row-title .pill.is-spam { margin-left: 6px; vertical-align: middle; }
 .pill.is-urgent { background: var(--accent); color: #fff; box-shadow: none; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; }
 .row-title .pill.is-urgent { margin-left: 6px; vertical-align: middle; }
 

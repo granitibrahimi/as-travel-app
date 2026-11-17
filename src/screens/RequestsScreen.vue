@@ -1,7 +1,8 @@
 <script setup>
-// / — the customer requests the user can see (an agent: the ones assigned to
-// or created by them; simpleTasks.listAll: everyone's). Active (open,
-// assigned) by default, or finished (offer sent, spam). Search by customer or #id.
+// / — the customer requests the user can see (an agent: every Open request
+// plus the ones assigned to or created by them; simpleTasks.listAll:
+// everyone's). Active (open, assigned, in progress) by default, or finished
+// (offer sent). Spam is a flag shown on the row. Search by customer or #id.
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
 import ErrorBox from '../components/ErrorBox.vue';
 import Icon from '../components/Icon';
@@ -9,6 +10,7 @@ import Loading from '../components/Loading.vue';
 import Shell from '../components/Shell.vue';
 import StatusPill from '../components/StatusPill.vue';
 import { api, query } from '../lib/api';
+import { destinationNames } from '../lib/format';
 import { canListRequests, memory, render, restoreScroll, state } from '../store';
 
 const props = defineProps({ params: Array, path: String, tab: String });
@@ -123,13 +125,14 @@ onBeforeUnmount(() => clearTimeout(searchTimer));
                             <div class="row-title">
                                 <span class="request-id">#{{ r.id }}</span> {{ r.customer_name }}
                                 <span v-if="r.urgent" class="pill is-urgent">Urgent</span>
+                                <span v-if="r.spam" class="pill is-spam">Spam</span>
                             </div>
                             <div class="row-sub request-meta">
                                 <StatusPill :status="r.status" />
                                 <span>{{ r.source.name }}</span>
                                 <span v-if="r.assigned_to">· {{ r.assigned_to.id === state.profile.id ? 'You' : r.assigned_to.name }}</span>
                             </div>
-                            <div v-if="r.parent_destination || r.specific_hotel" class="row-sub">{{ [r.parent_destination?.name, r.specific_hotel].filter(Boolean).join(' · ') }}</div>
+                            <div v-if="destinationNames(r) || r.specific_hotel" class="row-sub">{{ [destinationNames(r), r.specific_hotel].filter(Boolean).join(' · ') }}<template v-if="r.combo"> · Combo</template></div>
                             <div v-if="r.description" class="row-sub request-desc">{{ r.description }}</div>
                             <div class="row-sub">{{ r.created_at }}</div>
                         </div>

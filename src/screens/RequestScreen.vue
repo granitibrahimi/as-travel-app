@@ -1,7 +1,8 @@
 <script setup>
 // /requests/{id} — one customer request: who and how to reach them, what they
-// asked, status and agent, and its history. "Offer sent" / "Spam" close it
-// (simpleTasks.changeStatus); "Assign" picks the agent (simpleTasks.assign).
+// asked, status and agent, and its history. "In progress" and "Offer sent"
+// move it on (simpleTasks.changeStatus); "Spam" is a flag that leaves the
+// status as it is; "Assign" picks the agent (simpleTasks.assign).
 import { computed, nextTick, onMounted, ref, shallowRef } from 'vue';
 import ErrorBox from '../components/ErrorBox.vue';
 import Icon from '../components/Icon';
@@ -9,7 +10,7 @@ import Loading from '../components/Loading.vue';
 import Shell from '../components/Shell.vue';
 import StatusPill from '../components/StatusPill.vue';
 import { api } from '../lib/api';
-import { contactLink, whatsappLink } from '../lib/format';
+import { contactLink, destinationNames, whatsappLink } from '../lib/format';
 import { can, choiceDialog, confirmDialog, refreshScreen, render, restoreScroll, state, textDialog, toast } from '../store';
 
 const props = defineProps({ params: Array, path: String, tab: String });
@@ -19,7 +20,7 @@ const task = shallowRef(null);
 const error = shallowRef(null);
 const busy = ref(false);
 
-const STATUS = { OPEN: 1, ASSIGNED: 2, OFFER_SENT: 3, SPAM: 4 };
+const STATUS = { OPEN: 1, ASSIGNED: 2, OFFER_SENT: 3, IN_PROGRESS: 5 };
 
 const canChangeStatus = computed(() => can('simpleTasks.changeStatus'));
 const canAssign = computed(() => can('simpleTasks.assign'));
@@ -33,7 +34,7 @@ async function setStatus(status, { title, message, confirmLabel, danger = false 
     busy.value = true;
     try {
         await api(`/simple-tasks/${id}/status`, { method: 'PUT', body: { status } });
-        toast(status === STATUS.OFFER_SENT ? 'Marked as Offer sent.' : status === STATUS.SPAM ? 'Marked as Spam.' : 'Request reopened.');
+        toast(status === STATUS.OFFER_SENT ? 'Marked as Offer sent.' : status === STATUS.IN_PROGRESS ? 'Moved to In progress.' : 'Request reopened.');
         refreshScreen();
     } catch (e) {
         toast(e.message);
@@ -61,13 +62,30 @@ async function offerSent() {
         busy.value = false;
     }
 }
-const spam = () =>
-    setStatus(STATUS.SPAM, {
-        title: 'Mark as spam?',
-        message: 'The request is closed as Spam, and the responsible agents are notified.',
-        confirmLabel: 'Spam',
-        danger: true,
+const inProgress = () =>
+    setStatus(STATUS.IN_PROGRESS, {
+        title: 'Start working on it?',
+        message: task.value.assigned_to ? 'The request moves to In progress.' : 'The request moves to In progress and is assigned to you.',
+        confirmLabel: 'In progress',
     });
+
+// Spam is a flag, like Urgent: the status stays as it is.
+async function toggleSpam() {
+    const on = !task.value.spam;
+    const ok = await confirmDialog(on
+        ? { title: 'Mark as spam?', message: 'The request keeps its status and gets the Spam flag. The responsible agents are notified.', confirmLabel: 'Spam', danger: true }
+        : { title: 'Remove the Spam flag?', message: 'The request is no longer marked as spam.', confirmLabel: 'Not spam' });
+    if (!ok) return;
+    busy.value = true;
+    try {
+        await api(`/simple-tasks/${id}/spam`, { method: 'PUT', body: { spam: on } });
+        toast(on ? 'Marked as spam.' : 'Spam flag removed.');
+        refreshScreen();
+    } catch (e) {
+        toast(e.message);
+        busy.value = false;
+    }
+}
 const reopen = () =>
     setStatus(task.value.assigned_to ? STATUS.ASSIGNED : STATUS.OPEN, {
         title: 'Reopen the request?',
@@ -135,6 +153,8 @@ onMounted(async () => {
                 <div class="request-head-top">
                     <StatusPill :status="task.status" />
                     <span v-if="task.urgent" class="pill is-urgent">Urgent</span>
+                    <span v-if="task.spam" class="pill is-spam">Spam</span>
+                    <span v-if="task.combo" class="pill is-violet">Combo</span>
                     <span class="request-source">{{ task.source.name }}</span>
                 </div>
                 <h2>{{ task.customer_name }}</h2>
@@ -156,7 +176,7 @@ onMounted(async () => {
             </template>
 
             <div class="details">
-                <div v-if="task.parent_destination" class="detail"><span>Destination</span><strong>{{ task.parent_destination.name }}</strong></div>
+                <div v-if="destinationNames(task)" class="detail"><span>{{ (task.parent_destinations ?? []).length > 1 ? 'Destinations' : 'Destination' }}</span><strong>{{ destinationNames(task) }}<template v-if="task.combo"> (combo)</template></strong></div>
                 <div v-if="task.specific_hotel" class="detail"><span>Hotel</span><strong>{{ task.specific_hotel }}</strong></div>
                 <div class="detail"><span>Agent</span><strong>{{ task.assigned_to ? (task.assigned_to.id === state.profile.id ? `You (${task.assigned_to.name})` : task.assigned_to.name) : 'Not assigned' }}</strong></div>
                 <div v-if="task.assigned_at" class="detail"><span>Assigned</span><strong>{{ task.assigned_at }}</strong></div>
@@ -166,9 +186,12 @@ onMounted(async () => {
 
             <div v-if="canChangeStatus || canAssign" class="request-actions">
                 <template v-if="canChangeStatus && !finished">
+                    <button v-if="task.status.id !== STATUS.IN_PROGRESS" type="button" class="btn btn-secondary btn-block btn-lg" :disabled="busy" @click="inProgress">In progress</button>
                     <button type="button" class="btn btn-primary btn-block btn-lg" :disabled="busy" @click="offerSent">Offer sent</button>
-                    <button type="button" class="btn btn-danger btn-block" :disabled="busy" @click="spam">Spam</button>
                 </template>
+                <button v-if="canChangeStatus || can('simpleTasks.edit')" type="button" class="btn btn-block" :class="task.spam ? 'btn-secondary' : 'btn-danger'" :disabled="busy" @click="toggleSpam">
+                    {{ task.spam ? 'Not spam' : 'Spam' }}
+                </button>
                 <button v-if="canAssign && !finished" type="button" class="btn btn-secondary btn-block" :disabled="busy" @click="assign">
                     {{ task.assigned_to ? 'Reassign' : 'Assign' }}
                 </button>
