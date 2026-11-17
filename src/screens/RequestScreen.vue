@@ -1,7 +1,7 @@
 <script setup>
 // /requests/{id} — one customer request: who and how to reach them, what they
-// asked, status and agent, and its history. "In progress" and "Offer sent"
-// move it on (simpleTasks.changeStatus); "Spam" is a flag that leaves the
+// asked, status and agent, the offers sent, and its history. "Add offer"
+// records an offer (several per request); "In progress" and "Close" move it on (simpleTasks.changeStatus); "Spam" is a flag that leaves the
 // status as it is; "Assign" picks the agent (simpleTasks.assign).
 import { computed, nextTick, onMounted, ref, shallowRef } from 'vue';
 import ErrorBox from '../components/ErrorBox.vue';
@@ -34,7 +34,7 @@ async function setStatus(status, { title, message, confirmLabel, danger = false 
     busy.value = true;
     try {
         await api(`/simple-tasks/${id}/status`, { method: 'PUT', body: { status } });
-        toast(status === STATUS.OFFER_SENT ? 'Marked as Offer sent.' : status === STATUS.IN_PROGRESS ? 'Moved to In progress.' : 'Request reopened.');
+        toast(status === STATUS.OFFER_SENT ? 'Request closed.' : status === STATUS.IN_PROGRESS ? 'Moved to In progress.' : 'Request reopened.');
         refreshScreen();
     } catch (e) {
         toast(e.message);
@@ -42,26 +42,32 @@ async function setStatus(status, { title, message, confirmLabel, danger = false 
     }
 }
 
-// Offer sent: the agent pastes the offer they sent before the request is closed.
-async function offerSent() {
+// Add offer: the agent pastes an offer as sent. The request stays open; several offers can follow.
+async function addOffer() {
     const offerText = await textDialog({
-        title: 'Paste the offer you sent',
-        message: `Paste the offer exactly as you sent it to ${task.value.customer_name}. The request is closed and the responsible agents are notified.`,
+        title: `Offer ${(task.value.offers?.length ?? 0) + 1}`,
+        message: `Paste the offer exactly as you sent it to ${task.value.customer_name}. The request stays open until you close it.`,
         label: 'Offer sent to the customer',
         placeholder: 'Paste the offer text here…',
-        confirmLabel: 'Mark as offer sent',
+        confirmLabel: 'Save offer',
     });
     if (!offerText) return;
     busy.value = true;
     try {
-        await api(`/simple-tasks/${id}/status`, { method: 'PUT', body: { status: STATUS.OFFER_SENT, offer_text: offerText } });
-        toast('Marked as Offer sent.');
+        await api(`/simple-tasks/${id}/offers`, { method: 'POST', body: { offer_text: offerText } });
+        toast('Offer saved.');
         refreshScreen();
     } catch (e) {
         toast(e.message);
         busy.value = false;
     }
 }
+const close = () =>
+    setStatus(STATUS.OFFER_SENT, {
+        title: 'Close the request?',
+        message: 'The request is closed and the responsible agents are notified.',
+        confirmLabel: 'Close',
+    });
 const inProgress = () =>
     setStatus(STATUS.IN_PROGRESS, {
         title: 'Start working on it?',
@@ -170,9 +176,12 @@ onMounted(async () => {
                 <div class="note-card">{{ task.description }}</div>
             </template>
 
-            <template v-if="task.offer_text">
-                <h2 class="section-title">Offer sent<span v-if="task.offer_sent_at"> · {{ task.offer_sent_at }}</span></h2>
-                <div class="note-card">{{ task.offer_text }}</div>
+            <template v-if="task.offers?.length">
+                <h2 class="section-title">{{ task.offers.length }} {{ task.offers.length === 1 ? 'offer' : 'offers' }} sent</h2>
+                <div v-for="(offer, i) in task.offers" :key="offer.id ?? 'legacy'" class="offer-item">
+                    <div class="history-sub">Offer {{ i + 1 }}<template v-if="offer.user"> · {{ offer.user }}</template><template v-if="offer.created_at"> · {{ offer.created_at }}</template></div>
+                    <div class="note-card">{{ offer.offer_text }}</div>
+                </div>
             </template>
 
             <div class="details">
@@ -187,7 +196,8 @@ onMounted(async () => {
             <div v-if="canChangeStatus || canAssign" class="request-actions">
                 <template v-if="canChangeStatus && !finished">
                     <button v-if="task.status.id !== STATUS.IN_PROGRESS" type="button" class="btn btn-secondary btn-block btn-lg" :disabled="busy" @click="inProgress">In progress</button>
-                    <button type="button" class="btn btn-primary btn-block btn-lg" :disabled="busy" @click="offerSent">Offer sent</button>
+                    <button type="button" class="btn btn-primary btn-block btn-lg" :disabled="busy" @click="addOffer">Add offer</button>
+                    <button type="button" class="btn btn-secondary btn-block" :disabled="busy" @click="close">Close</button>
                 </template>
                 <button v-if="canChangeStatus || can('simpleTasks.edit')" type="button" class="btn btn-block" :class="task.spam ? 'btn-secondary' : 'btn-danger'" :disabled="busy" @click="toggleSpam">
                     {{ task.spam ? 'Not spam' : 'Spam' }}

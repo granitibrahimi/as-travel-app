@@ -1338,6 +1338,14 @@ svg {
     overflow-wrap: anywhere;
 }
 
+.offer-item + .offer-item {
+    margin-top: 10px;
+}
+
+.offer-item .history-sub {
+    margin: 0 4px 4px;
+}
+
 .request-actions {
     margin-top: 6px;
 }

@@ -14,7 +14,7 @@ export const initials = (name) =>
 export const STATUS_PILL = {
     1: 'is-blue', // Open
     2: 'is-amber', // Assigned
-    3: 'is-green', // Offer sent
+    3: 'is-green', // Closed (was Offer sent)
     4: 'is-muted', // Spam (old status; spam is a flag now)
     5: 'is-violet', // In progress
 };

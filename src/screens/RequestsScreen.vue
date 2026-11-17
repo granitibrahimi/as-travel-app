@@ -2,7 +2,7 @@
 // / — the customer requests the user can see (an agent: every Open request
 // plus the ones assigned to or created by them; simpleTasks.listAll:
 // everyone's). Active (open, assigned, in progress) by default, or finished
-// (offer sent). Spam is a flag shown on the row. Search by customer or #id.
+// (closed). Spam is a flag shown on the row. Search by customer or #id.
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
 import ErrorBox from '../components/ErrorBox.vue';
 import Icon from '../components/Icon';
@@ -126,6 +126,7 @@ onBeforeUnmount(() => clearTimeout(searchTimer));
                                 <span class="request-id">#{{ r.id }}</span> {{ r.customer_name }}
                                 <span v-if="r.urgent" class="pill is-urgent">Urgent</span>
                                 <span v-if="r.spam" class="pill is-spam">Spam</span>
+                                <span v-if="r.offers_count" class="pill is-green">{{ r.offers_count }} {{ r.offers_count === 1 ? 'offer' : 'offers' }}</span>
                             </div>
                             <div class="row-sub request-meta">
                                 <StatusPill :status="r.status" />

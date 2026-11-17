@@ -15,7 +15,7 @@ const enableButton = ref(null);
 
 const points = computed(() => [
     'When a customer request is assigned to you',
-    ...(can('simpleTasks.responsible') ? ['When a request is closed: Offer sent or Spam'] : []),
+    ...(can('simpleTasks.responsible') ? ['When a request is closed or marked as spam'] : []),
     'They arrive even when the app is closed',
 ]);
 
