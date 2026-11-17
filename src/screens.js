@@ -1,6 +1,7 @@
 // The route table: [pattern, screen, tab]. App.vue picks the first match for
 // the signed-in user (a screen they have no permission for isn't listed).
 
+import ChatScreen from './screens/ChatScreen.vue';
 import LoginScreen from './screens/LoginScreen.vue';
 import NotificationsScreen from './screens/NotificationsScreen.vue';
 import ProfileScreen from './screens/ProfileScreen.vue';
@@ -26,6 +27,7 @@ export function routesFor(profile) {
                   [/^\/reminders\/(\d+)$/, ReminderScreen, 'reminders'],
               ]
             : []),
+        ...(can('aiChat.use') ? [[/^\/chat$/, ChatScreen, 'chat']] : []),
         [/^\/profile$/, ProfileScreen, 'profile'],
     ];
 }
