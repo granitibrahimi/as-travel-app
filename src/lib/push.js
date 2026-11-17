@@ -73,11 +73,27 @@ export function needsPushPrompt() {
     return pushSupported() && Notification.permission !== 'denied';
 }
 
+/**
+ * The API keeps no subscription for the user (never saved, or removed from the
+ * CRM user page), so the one this browser still holds is stale: drop it, so
+ * turning notifications on creates a fresh one.
+ */
+async function dropStaleSubscription() {
+    try {
+        const subscription = await (await navigator.serviceWorker.ready).pushManager.getSubscription();
+        await subscription?.unsubscribe();
+    } catch {
+        /* nothing to drop */
+    }
+}
+
 /** After /me: ask with the popup when needed, otherwise keep the subscription fresh without asking. */
-export function pushAfterProfile() {
+export async function pushAfterProfile() {
     if (!needsPushPrompt()) return syncPush();
     if (promptShownFor === state.token) return;
     promptShownFor = state.token;
+    state.pushActive = false;
+    await dropStaleSubscription();
     state.pushPrompt = true;
 }
 
