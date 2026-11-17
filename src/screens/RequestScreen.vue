@@ -159,7 +159,7 @@ onMounted(async () => {
                 <div class="request-head-top">
                     <StatusPill :status="task.status" />
                     <span v-if="task.urgent" class="pill is-urgent">Urgent</span>
-                    <span v-if="task.spam" class="pill is-spam">Spam</span>
+                    <span v-if="task.spam" class="pill is-spam"><Icon name="spam" /> Spam</span>
                     <span v-if="task.combo" class="pill is-violet">Combo</span>
                     <span class="request-source">{{ task.source.name }}</span>
                 </div>
@@ -199,8 +199,8 @@ onMounted(async () => {
                     <button type="button" class="btn btn-primary btn-block btn-lg" :disabled="busy" @click="addOffer">Add offer</button>
                     <button type="button" class="btn btn-secondary btn-block" :disabled="busy" @click="close">Close</button>
                 </template>
-                <button v-if="canChangeStatus || can('simpleTasks.edit')" type="button" class="btn btn-block" :class="task.spam ? 'btn-secondary' : 'btn-danger'" :disabled="busy" @click="toggleSpam">
-                    {{ task.spam ? 'Not spam' : 'Spam' }}
+                <button v-if="canChangeStatus || can('simpleTasks.edit')" type="button" class="btn btn-block btn-spam" :class="{ 'is-on': task.spam }" :disabled="busy" @click="toggleSpam">
+                    <Icon name="spam" /> {{ task.spam ? 'Flagged as spam · remove' : 'Mark as spam' }}
                 </button>
                 <button v-if="canAssign && !finished" type="button" class="btn btn-secondary btn-block" :disabled="busy" @click="assign">
                     {{ task.assigned_to ? 'Reassign' : 'Assign' }}

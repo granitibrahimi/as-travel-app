@@ -125,7 +125,7 @@ onBeforeUnmount(() => clearTimeout(searchTimer));
                             <div class="row-title">
                                 <span class="request-id">#{{ r.id }}</span> {{ r.customer_name }}
                                 <span v-if="r.urgent" class="pill is-urgent">Urgent</span>
-                                <span v-if="r.spam" class="pill is-spam">Spam</span>
+                                <span v-if="r.spam" class="pill is-spam"><Icon name="spam" /> Spam</span>
                                 <span v-if="r.offers_count" class="pill is-green">{{ r.offers_count }} {{ r.offers_count === 1 ? 'offer' : 'offers' }}</span>
                             </div>
                             <div class="row-sub request-meta">
