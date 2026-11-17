@@ -132,7 +132,7 @@ onBeforeUnmount(() => clearTimeout(searchTimer));
                                 <span>{{ r.source.name }}</span>
                                 <span v-if="r.assigned_to">· {{ r.assigned_to.id === state.profile.id ? 'You' : r.assigned_to.name }}</span>
                             </div>
-                            <div v-if="destinationNames(r) || r.specific_hotel" class="row-sub">{{ [destinationNames(r), r.specific_hotel].filter(Boolean).join(' · ') }}<template v-if="r.combo"> · Combo</template></div>
+                            <div v-if="destinationNames(r) || r.specific_hotel" class="row-sub">{{ [r.combo ? 'Combo' : null, destinationNames(r), r.specific_hotel].filter(Boolean).join(' · ') }}</div>
                             <div v-if="r.description" class="row-sub request-desc">{{ r.description }}</div>
                             <div class="row-sub">{{ r.created_at }}</div>
                         </div>
