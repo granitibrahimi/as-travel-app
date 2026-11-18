@@ -51,8 +51,22 @@ document.addEventListener('visibilitychange', () => {
     if (hiddenAt && Date.now() - hiddenAt > 30 * 1000) refreshOpenScreen();
 });
 
+// Also check on start and every two minutes while the app is on screen.
+reloadIfDeployed();
+setInterval(() => {
+    if (document.visibilityState === 'visible') reloadIfDeployed();
+}, 2 * 60 * 1000);
+
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-    navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => {});
+    const hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.register('/sw.js', { scope: '/' }).then((reg) => reg.update()).catch(() => {});
+    // A new service worker took over (public/sw.js CACHE bumped): load the new version once.
+    let reloading = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!hadController || reloading) return;
+        reloading = true;
+        location.reload();
+    });
     // public/sw.js tells the open app about each push it shows.
     navigator.serviceWorker.addEventListener('message', (event) => {
         if (event.data?.type === 'push') refreshOpenScreen();

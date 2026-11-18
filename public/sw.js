@@ -2,7 +2,8 @@
 // app shell and its built assets so the app opens straight away, even on a bad
 // connection; the API (another origin) is never cached. It also shows the
 // pushes from the platform API (Modules\Users\Services\WebPush).
-const CACHE = 'as-travel-app-v1';
+// Bump to force every installed app to drop its cached files and reload.
+const CACHE = 'as-travel-app-v2';
 const SHELL = ['/', '/app/manifest.webmanifest', '/app/icon-192.png', '/app/logo.svg', '/app/logo-mark-white.svg'];
 
 self.addEventListener('install', (event) => {
