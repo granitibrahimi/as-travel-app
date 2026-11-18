@@ -130,6 +130,7 @@ onBeforeUnmount(() => clearTimeout(searchTimer));
                             </div>
                             <div class="row-sub request-meta">
                                 <StatusPill :status="r.status" />
+                                <span v-if="r.type" class="pill">{{ r.type.name }}</span>
                                 <span>{{ r.source.name }}</span>
                                 <span v-if="r.assigned_to">· {{ r.assigned_to.id === state.profile.id ? 'You' : r.assigned_to.name }}</span>
                             </div>

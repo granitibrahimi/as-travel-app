@@ -176,6 +176,7 @@ onMounted(async () => {
                     <span v-if="task.urgent" class="pill is-urgent">Urgent</span>
                     <span v-if="task.spam" class="pill is-spam"><Icon name="spam" /> Spam</span>
                     <span v-if="task.combo" class="pill is-violet">Combo</span>
+                    <span v-if="task.type" class="pill">{{ task.type.name }}</span>
                     <span class="request-source">{{ task.source.name }}</span>
                 </div>
                 <h2>{{ task.customer_name }}</h2>
