@@ -1844,3 +1844,11 @@ html:has(.composer) .toast {
     padding: 0 3px;
     font-size: 8px;
 }
+
+/* Two-factor step on the login screen. */
+.login-note { margin: 0 0 14px; padding: 10px 12px; border-radius: 10px; background: #fef3c7; color: #92400e; font-size: 14px; }
+.login-step-title { margin: 0; font-size: 18px; font-weight: 700; text-align: center; }
+.login-step-text { margin: 0; color: var(--muted); font-size: 14px; text-align: center; }
+.login-qr { display: block; width: 200px; height: 200px; margin: 0 auto; padding: 8px; border-radius: 12px; background: #fff; }
+.login-key { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--text); word-break: break-all; user-select: all; }
+.field input.login-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 22px; letter-spacing: .4em; text-align: center; }

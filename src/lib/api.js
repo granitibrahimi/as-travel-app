@@ -75,7 +75,7 @@ export async function api(path, { method = 'GET', body } = {}) {
     const payload = await response.json().catch(() => ({}));
 
     if (response.status === 401 && path !== '/users/tokens') {
-        unauthorized();
+        unauthorized(payload);
         throw new ApiError('Your session has expired. Please sign in again.', 401);
     }
     if (!response.ok) {

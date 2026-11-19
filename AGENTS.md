@@ -28,6 +28,12 @@ classes, restyled in AS Travel red (`#d92128`, the logo's red).
   as-travel-app`, so signing in here does not sign the user out of the SPA.
   These sessions expire after `AGENTS_APP_SESSION_MINUTES` on the API
   (default 30 days); the 401 then sends the user to the login screen.
+  Sign-in has a two-factor step (authenticator app): `POST /users/tokens`
+  answers `{ two_factor: 'code' }` or, for a user who hasn't set it up yet,
+  `{ two_factor: 'setup', qr_code, otpauth_url, secret }` instead of a token;
+  the login screen then posts the same credentials again with `code`. A 401
+  with `two_factor_setup_required` opens the login screen with
+  `?reason=two-factor`.
   The API's `CORS_ALLOWED_ORIGINS` must list this app's origin. `VITE_*`
   values are fixed at build time.
 - **Endpoints used**: `POST/DELETE /users/tokens`, `GET /users/me`,

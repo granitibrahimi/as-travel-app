@@ -52,7 +52,8 @@ export function refreshScreen() {
     render();
 }
 
-export function signOut() {
+/** `payload`: the API's 401 body; two_factor_setup_required means sign in again to set up two-factor. */
+export function signOut(payload = null) {
     state.token = null;
     state.profile = null;
     state.profileError = null;
@@ -61,7 +62,7 @@ export function signOut() {
     state.unreadCount = 0;
     memory.clear();
     storage.set(TOKEN_KEY, null);
-    navigate('/login', { replace: true });
+    navigate(payload?.two_factor_setup_required ? '/login?reason=two-factor' : '/login', { replace: true });
 }
 
 onUnauthorized(signOut);
