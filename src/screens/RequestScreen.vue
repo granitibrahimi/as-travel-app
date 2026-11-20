@@ -205,6 +205,7 @@ onMounted(async () => {
             <div class="details">
                 <div v-if="destinationNames(task)" class="detail"><span>{{ (task.parent_destinations ?? []).length > 1 ? 'Destinations' : 'Destination' }}</span><strong><template v-if="task.combo">Combo: </template>{{ destinationNames(task) }}</strong></div>
                 <div v-if="task.specific_hotel" class="detail"><span>Hotel</span><strong>{{ task.specific_hotel }}</strong></div>
+                <div v-if="task.contact?.customers?.length" class="detail"><span>{{ task.contact.customers.length > 1 ? 'Customers' : 'Customer' }}</span><strong>{{ task.contact.customers.map((c) => c.name).join(', ') }}</strong></div>
                 <div class="detail"><span>Agent</span><strong>{{ task.assigned_to ? (task.assigned_to.id === state.profile.id ? `You (${task.assigned_to.name})` : task.assigned_to.name) : 'Not assigned' }}</strong></div>
                 <div v-if="task.assigned_at" class="detail"><span>Assigned</span><strong>{{ task.assigned_at }}</strong></div>
                 <div class="detail"><span>Created</span><strong>{{ task.created_at }}<template v-if="task.created_by"> · {{ task.created_by.name }}</template></strong></div>
