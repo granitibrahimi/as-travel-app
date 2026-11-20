@@ -120,10 +120,12 @@ onBeforeUnmount(() => clearTimeout(searchTimer));
             <div v-else-if="items.length === 0" class="empty"><p>{{ emptyText }}</p></div>
             <template v-else>
                 <div class="list">
-                    <a v-for="r in items" :key="r.id" class="row request-row" data-link :href="`/requests/${r.id}`">
+                    <a v-for="r in items" :key="r.id" class="row request-row" :class="{ 'is-boss': r.from_flamur || r.from_vesa }" data-link :href="`/requests/${r.id}`">
                         <div class="row-main">
                             <div class="row-title">
                                 <span class="request-id">#{{ r.id }}</span> {{ r.customer_name }}
+                                <span v-if="r.from_flamur" class="pill is-boss">From Flamur</span>
+                                <span v-if="r.from_vesa" class="pill is-boss">From Vesa</span>
                                 <span v-if="r.urgent" class="pill is-urgent">Urgent</span>
                                 <span v-if="r.spam" class="pill is-spam"><Icon name="spam" /> Spam</span>
                                 <span v-if="r.offers_count" class="pill is-green">{{ r.offers_count }} {{ r.offers_count === 1 ? 'offer' : 'offers' }}</span>

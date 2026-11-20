@@ -173,6 +173,8 @@ onMounted(async () => {
             <section class="request-head">
                 <div class="request-head-top">
                     <StatusPill :status="task.status" />
+                    <span v-if="task.from_flamur" class="pill is-boss">From Flamur</span>
+                    <span v-if="task.from_vesa" class="pill is-boss">From Vesa</span>
                     <span v-if="task.urgent" class="pill is-urgent">Urgent</span>
                     <span v-if="task.spam" class="pill is-spam"><Icon name="spam" /> Spam</span>
                     <span v-if="task.combo" class="pill is-violet">Combo</span>

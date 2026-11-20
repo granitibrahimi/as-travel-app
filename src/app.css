@@ -1254,6 +1254,10 @@ svg {
 .btn-spam.is-on { background: #f97316; color: #fff; border-color: #f97316; }
 .pill.is-urgent { background: var(--accent); color: #fff; box-shadow: none; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; }
 .row-title .pill.is-urgent { margin-left: 6px; vertical-align: middle; }
+/* Requests from Flamur or Vesa: highest priority. */
+.pill.is-boss { background: #b91c1c; color: #fff; box-shadow: none; font-weight: 800; text-transform: uppercase; letter-spacing: .02em; }
+.row-title .pill.is-boss { margin-left: 6px; vertical-align: middle; }
+.request-row.is-boss { box-shadow: inset 0 0 0 2px #dc2626; border-radius: 12px; }
 
 .chip-btn.is-small {
     padding: 5px 11px;
