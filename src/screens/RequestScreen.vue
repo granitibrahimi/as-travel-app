@@ -10,7 +10,7 @@ import Loading from '../components/Loading.vue';
 import Shell from '../components/Shell.vue';
 import StatusPill from '../components/StatusPill.vue';
 import { api } from '../lib/api';
-import { contactLink, destinationNames, whatsappLink } from '../lib/format';
+import { contactLink, destinationNames, formatPhone, whatsappLink } from '../lib/format';
 import { can, choiceDialog, confirmDialog, refreshScreen, render, restoreScroll, state, textDialog, toast } from '../store';
 
 const props = defineProps({ params: Array, path: String, tab: String });
@@ -182,7 +182,7 @@ onMounted(async () => {
                     <span class="request-source">{{ task.source.name }}</span>
                 </div>
                 <h2>{{ task.customer_name }}</h2>
-                <p v-if="task.customer_contact" class="request-contact">{{ task.customer_contact }}</p>
+                <p v-if="task.customer_contact" class="request-contact">{{ formatPhone(task.customer_contact) }}</p>
                 <div v-if="call || whatsapp" class="contact-actions">
                     <a v-if="call" :href="call" class="btn btn-secondary"><Icon name="phone" /> {{ call.startsWith('mailto:') ? 'E-mail' : 'Call' }}</a>
                     <a v-if="whatsapp" :href="whatsapp" target="_blank" rel="noopener" class="btn btn-secondary btn-whatsapp">WhatsApp</a>
