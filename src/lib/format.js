@@ -1,4 +1,5 @@
 // Formatting shared by the screens. The API already sends dates as d.m.Y H:i.
+import { parsePhoneNumberFromString } from 'libphonenumber-js/min';
 
 /** "Arta Krasniqi" → "AK". */
 export const initials = (name) =>
@@ -23,11 +24,24 @@ export const STATUS_PILL = {
 export const destinationNames = (task) =>
     (task?.parent_destinations ?? (task?.parent_destination ? [task.parent_destination] : [])).map((d) => d.name).join(', ');
 
+/**
+ * Phone numbers are stored as digits with the country code (37744159481);
+ * shown as +377 44 159 481. Anything else is returned unchanged.
+ */
+export const formatPhone = (contact) => {
+    const value = (contact ?? '').trim();
+    if (!/^\+?\d{7,15}$/.test(value.replace(/[\s().\-/]/g, ''))) return contact;
+    const digits = value.replace(/\D/g, '').replace(/^00/, '');
+    return parsePhoneNumberFromString(`+${digits}`)?.formatInternational() ?? contact;
+};
+
 /** A phone number or e-mail as a link the phone can open, or null. */
 export const contactLink = (contact) => {
     const value = (contact ?? '').trim();
     if (!value) return null;
     if (/^\S+@\S+\.\S+$/.test(value)) return `mailto:${value}`;
+    // Stored numbers are digits with country code: dial them with "+".
+    if (/^\d{7,15}$/.test(value)) return `tel:+${value}`;
     const digits = value.replace(/[^\d+]/g, '');
     return digits.length >= 6 ? `tel:${digits}` : null;
 };
